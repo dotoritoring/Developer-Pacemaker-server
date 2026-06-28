@@ -185,13 +185,16 @@ public class PlannerService {
             LocalDate startDate = yearMonth.atDay(1);
             LocalDate endDate = yearMonth.atEndOfMonth();
 
-            List<PlannerEntity> plannerEntities = plannerRepository.findByUser_uSeqAndIsDeletedAndRegisteredBetween(uSeq, false, startDate, endDate);
+            List<Object[]> results = plannerRepository.findCompletedTodoCountByDate(uSeq, startDate, endDate);
 
             Map<LocalDate, Long> completedTaskCounts = new HashMap<>();
-            for(PlannerEntity planner:plannerEntities){
-                long completedCount = planner.getTodoEntities().stream().filter(TodoEntity::isCompleted).count();
-                completedTaskCounts.put(planner.getRegistered(), completedCount);
+            for(Object[] result:results){
+                LocalDate date = (LocalDate) result[0];
+                Long count = (Long) result[1];
+
+                completedTaskCounts.put(date, count);
             }
+
             return completedTaskCounts;
         }catch (Exception e){
             System.out.println("e:: "+e.getMessage());
